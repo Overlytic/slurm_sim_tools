@@ -54,8 +54,11 @@ def cp_slurm_conf_dir(args):
     new_slurm_topdir=os.path.abspath(args.new_slurm_topdir)
     new_slurm_etc=os.path.join(args.new_slurm_topdir,"etc")
     overwrite=args.overwrite
-    
-    
+
+    slurm_user = args.user
+    storage_pass = args.password
+    storage_host = args.host
+
     if not os.path.isdir(old_etc):
         raise Exception("Directory "+old_etc+" does not exist")
     if not os.path.isfile(os.path.join(old_etc,'slurm.conf')):
@@ -120,8 +123,10 @@ def cp_slurm_conf_dir(args):
         with open(filename,'wt') as fout:
             for l in lines:
                 fout.write(update_line(l))
-    
-    update_file(slurm_conf_loc,{
+
+    # Update slurm.conf
+
+    slurm_update_dic = {
         'JobCredentialPrivateKey':os.path.join(new_slurm_topdir, 'etc/slurm.key'),
         'JobCredentialPublicCertificate':os.path.join(new_slurm_topdir, 'etc/slurm.cert'),
         'JobCompLoc':os.path.join(new_slurm_topdir, 'log/jobcomp.log'),
@@ -131,13 +136,37 @@ def cp_slurm_conf_dir(args):
         'StateSaveLocation':os.path.join(new_slurm_topdir, 'var/state'),
         'SlurmSchedLogFile':os.path.join(new_slurm_topdir, 'log/slurm_sched.log'),
         'PluginDir':os.path.join(slurm_bin, 'lib/slurm'),
-    })
+    }
+
+    if slurm_user is not None: 
+        slurm_update_dic['SlurmUser'] = slurm_user
+
+    update_file(slurm_conf_loc, slurm_update_dic)
+
+    
     if os.path.isfile(slurmdbd_conf_loc):
-        update_file(slurmdbd_conf_loc,{
+
+        # Update slurmdbd.conf
+
+        slurmdbd_update_dic = {
             'PidFile':os.path.join(new_slurm_topdir, 'var/run/slurmdbd.pid'),
             'LogFile':os.path.join(new_slurm_topdir, 'log/slurmdbd.log'),
             'PluginDir':os.path.join(slurm_bin, 'lib/slurm'),
-        })
+        }
+
+        if slurm_user is not None: 
+            slurmdbd_update_dic['SlurmUser'] = slurm_user
+            slurmdbd_update_dic['StorageUser'] = slurm_user
+
+        if storage_pass is not None:
+            slurmdbd_update_dic['StoragePass'] = storage_pass
+
+        if storage_host is not None:
+            slurmdbd_update_dic['StorageHost'] = storage_host 
+
+        update_file(slurmdbd_conf_loc,slurmdbd_update_dic)
+
+
     else:
         log.info("There is no slurmdb.conf")
         
@@ -162,6 +191,15 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--slurm-bin', required=True, type=str,
         help="top directory of slurm binaries installation")
     
+    parser.add_argument('-u', '--user', required=False, type=str,
+            help="Name of user used to run simulations. Will replace slurmUser in slurm.conf and slurmUser and StorageUser in slurmdbd.conf")
+
+    parser.add_argument('-p', '--password', required=False, type=str,
+            help="Password of user used to run simulations. Will replace StoragePass in slurmdbd.conf")
+
+    parser.add_argument('-H', '--host', required=False, type=str,
+            help="Name or ip of Storage Host for Accounting database hostname. Will replace storageHost parameter in slurmdbd.conf")
+
     parser.add_argument('-o', '--overwrite', action='store_true', 
         help="overwrite existing files")
     
