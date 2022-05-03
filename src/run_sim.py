@@ -222,9 +222,10 @@ def check_slurmdbd_conf(slurmdbd_conf,slurm_etc,slurm_bin_top):
                 error_count+=1
                 log.error("For simulation StorageHost should be set to localhost!")
             else:
-                if slurmdbd_conf["StorageHost".lower()]!="localhost":
-                    error_count+=1
-                    log.error("For simulation StorageHost should be set to localhost!")
+                pass
+                # if slurmdbd_conf["StorageHost".lower()]!="localhost":
+                #    error_count+=1
+                #    log.error("For simulation StorageHost should be set to localhost!")
     else:
         error_count+=1
         log.error("StorageType is not set!")
@@ -391,7 +392,7 @@ def run_sim(args):
         slurmdbd_proc=subprocess.Popen([slurmdbd_loc,'-Dvv'],env={'SLURM_CONF':slurm_conf_loc},
                                        stdout=slurmdbd_out,stderr=slurmdbd_out)
     #let the slurmdbd to spin-off
-    sleep(3)
+    sleep(10)
     #start slurmctrl
     global slurmctld_proc
     global slurmctld_out
