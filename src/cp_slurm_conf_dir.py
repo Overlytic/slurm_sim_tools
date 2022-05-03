@@ -11,6 +11,7 @@ from time import sleep,time
 from process_sprio import process_sprio
 from process_simstat import process_simstat
 
+import getpass as gt
 
 slurmdbd_proc=None
 slurmdbd_out=None
@@ -188,10 +189,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''Slurm Simulator Toolkit.
     Copy Slurm etc directory to new location update pathways in slurm.conf to use new location''')
     
-    parser.add_argument('-s', '--slurm-bin', required=True, type=str,
-        help="top directory of slurm binaries installation")
+    parser.add_argument('-s', '--slurm-bin', required=False, type=str,
+            default="/opt/slurm_sim_ws/slurm_opt",
+            help="top directory of slurm binaries installation")
     
     parser.add_argument('-u', '--user', required=False, type=str,
+            default = gt.getuser(),
             help="Name of user used to run simulations. Will replace slurmUser in slurm.conf and slurmUser and StorageUser in slurmdbd.conf")
 
     parser.add_argument('-p', '--password', required=False, type=str,

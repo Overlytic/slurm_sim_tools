@@ -481,7 +481,8 @@ if __name__ == '__main__':
         
     parser = argparse.ArgumentParser(description='Slurm Simulator Run automation')
     
-    parser.add_argument('-s', '--slurm', required=True, type=str,
+    parser.add_argument('-s', '--slurm', required=False, type=str,
+        default="/opt/slurm_sim_ws/slurm_bin",
         help="top directory of slurm installation")
     parser.add_argument('-e', '--etc', required=True, type=str,
         help="etc directory for current simulation")
